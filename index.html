@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarioGPT</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+  <style>
+    /* ───────────────────────── CSS Variables ───────────────────────── */
+    :root {
+      --accent: #ec6c33;
+      --accent-dark: #d45a2a;
+      --accent-light: #f5a473;
+      --bg: #1a1a1a;
+      --bg-grad: radial-gradient(ellipse at 50% 0%, #2a2a2a 0%, #1a1a1a 70%);
+      --card-bg: #ffffff;
+      --card-radius: 20px;
+      --card-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      --nav-height: 60px;
+      --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ───────────────────────── Reset ───────────────────────── */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: var(--bg);
+      background-image: var(--bg-grad);
+      color: #e2e8f0;
+      overflow: hidden;
+    }
+
+    /* ───────────────────────── Navigation ───────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      background: rgba(26, 26, 26, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #f1f5f9;
+    }
+
+    .nav-brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .nav-brand span {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(236, 108, 51, 0.15);
+      border-color: var(--accent);
+      color: var(--accent-light);
+    }
+
+    /* ───────────────────────── Background Decoration ───────────────────────── */
+    .bg-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow-1 {
+      width: 700px;
+      height: 700px;
+      top: -200px;
+      left: -150px;
+      background: var(--accent);
+      opacity: 0.25;
+      animation: drift1 8s ease-in-out infinite alternate;
+    }
+
+    .bg-glow-2 {
+      width: 600px;
+      height: 600px;
+      bottom: -250px;
+      right: -150px;
+      background: #4a4a4a;
+      opacity: 0.3;
+      animation: drift2 10s ease-in-out infinite alternate;
+    }
+
+    .bg-glow-3 {
+      top: 30%;
+      left: 45%;
+      width: 500px;
+      height: 500px;
+      background: var(--accent-dark);
+      opacity: 0.15;
+      animation: drift3 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(200px, 150px) scale(1.2); }
+      100% { transform: translate(-80px, 250px) scale(0.9); }
+    }
+
+    @keyframes drift2 {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(-180px, -120px) scale(1.15); }
+      100% { transform: translate(120px, -200px) scale(0.85); }
+    }
+
+    @keyframes drift3 {
+      0%   { transform: translate(-50%, 0) scale(1); }
+      50%  { transform: translate(-20%, -120px) scale(1.3); }
+      100% { transform: translate(-80%, 100px) scale(0.8); }
+    }
+
+    /* ───────────────────────── Chat Card ───────────────────────── */
+    .chat-card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 420px;
+      height: min(640px, calc(100vh - 100px));
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, #f08050 0%, var(--accent) 50%, var(--accent-dark) 100%);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .chat-header-actions {
+      margin-left: auto;
+    }
+
+    .new-chat-btn {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .new-chat-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .new-chat-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .chat-header-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px;
+      flex-shrink: 0;
+    }
+
+    .chat-header-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .chat-header-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header-name {
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .chat-header-tagline {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.78rem;
+      font-weight: 400;
+    }
+
+    /* ───────────────────────── Web Chat Container ───────────────────────── */
+    #webchat {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Override some Web Chat defaults for a cleaner look */
+    #webchat > * {
+      height: 100%;
+    }
+
+    /* Hide the built-in Copilot Studio typing indicator */
+    #webchat .webchat__typing-indicator,
+    #webchat [class*="typing-indicator"],
+    #webchat .webchat__typing-activity {
+      display: none !important;
+    }
+
+    /* ───────────────────────── Thinking Indicator ───────────────────────── */
+    .thinking-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(241, 240, 238, 0.95);
+      border-radius: 20px;
+      margin: 8px auto 10px auto;
+      flex-shrink: 0;
+      width: fit-content;
+      font-size: 0.75rem;
+    }
+
+    .thinking-indicator.visible {
+      display: flex;
+    }
+
+    .thinking-dots {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .thinking-dots span {
+      width: 6px;
+      height: 6px;
+      background: #999;
+      border-radius: 50%;
+      animation: bounce 1.4s ease-in-out infinite;
+    }
+
+    .thinking-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .thinking-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .thinking-label {
+      font-size: 0.78rem;
+      color: #999;
+      font-style: italic;
+    }
+
+    /* ───────────────────────── Loading State ───────────────────────── */
+    .chat-loading {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .chat-loading.hidden {
+      display: none;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ───────────────────────── Modal Overlay ───────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #2a2a2a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(12px);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-overlay.visible .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 20px;
+    }
+
+    /* ───────────────────────── Demo Prompts ───────────────────────── */
+    .demo-prompts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .demo-prompt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      width: 100%;
+    }
+
+    .demo-prompt:hover {
+      background: rgba(236, 108, 51, 0.12);
+      border-color: var(--accent);
+      color: #f1f5f9;
+    }
+
+    .demo-prompt-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .demo-prompt-hint {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.78rem;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    /* ───────────────────────── How It Works ───────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .step-text h3 {
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .step-text p {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* ───────────────────────── Demo Prompts ───────────────────────── */
+    .demo-prompts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .demo-prompt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      width: 100%;
+    }
+
+    .demo-prompt:hover {
+      background: rgba(236, 108, 51, 0.12);
+      border-color: var(--accent);
+      color: #f1f5f9;
+    }
+
+    .demo-prompt-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .demo-prompt-hint {
+      color: #64748b;
+      font-size: 0.8rem;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    /* ───────────────────────── Responsive ───────────────────────── */
+    @media (max-width: 768px) {
+      .chat-card {
+        width: 95vw;
+        height: calc(100dvh - var(--nav-height) - 16px);
+        max-height: none;
+        top: calc(var(--nav-height) + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 16px;
+      }
+
+      .chat-header {
+        padding: 10px 16px;
+        gap: 10px;
+      }
+
+      .chat-header-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        padding: 3px;
+      }
+
+      .chat-header-name {
+        font-size: 0.92rem;
+      }
+
+      .chat-header-tagline {
+        font-size: 0.7rem;
+      }
+
+      .nav-btn-text {
+        display: none;
+      }
+
+      .nav-btn-icon {
+        display: inline;
+      }
+
+      .nav-btn {
+        padding: 8px 12px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .chat-card {
+        width: 100vw;
+        height: calc(100dvh - var(--nav-height));
+        top: var(--nav-height);
+        bottom: auto;
+        left: 0;
+        transform: none;
+        border-radius: 0;
+      }
+
+      nav {
+        padding: 0 16px;
+      }
+    }
+
+    /* Hide icon on desktop, show text; reverse on mobile */
+    .nav-btn-icon {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .nav-btn-icon {
+        display: inline;
+      }
+
+      .nav-btn-text {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background glows -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <!-- ─── Navigation ─── -->
+  <nav>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="toggleModal('how-it-works')" aria-label="How It Works">
+        <span class="nav-btn-text">How It Works</span>
+        <span class="nav-btn-icon" aria-hidden="true">&#9432;</span>
+      </button>
+      <button class="nav-btn" onclick="toggleModal('demo-prompts')" aria-label="Demo Prompts">
+        <span class="nav-btn-text">Demo Prompts</span>
+        <span class="nav-btn-icon" aria-hidden="true">&#9733;</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── Chat Card ─── -->
+  <div class="chat-card">
+    <div class="chat-header">
+      <div class="chat-header-avatar">
+        <img src="logo.png" alt="MarioGPT avatar" />
+      </div>
+      <div class="chat-header-info">
+        <div class="chat-header-name">MarioGPT</div>
+        <div class="chat-header-tagline">(It's not actually Mario)</div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="new-chat-btn" onclick="restartConversation()" aria-label="New conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+          New Chat
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading spinner shown while SDK initializes -->
+    <div class="chat-loading" id="chat-loading">
+      <div class="spinner"></div>
+      <span>Connecting to MarioGPT…</span>
+    </div>
+
+    <!-- Web Chat renders here -->
+    <div id="webchat"></div>
+
+    <!-- Thinking indicator (outside webchat so it doesn't get overwritten) -->
+    <div class="thinking-indicator" id="thinking-indicator">
+      <div class="thinking-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="thinking-label">MarioGPT is thinking…</span>
+    </div>
+  </div>
+
+  <!-- ─── How It Works Modal ─── -->
+  <div class="modal-overlay" id="how-it-works" onclick="closeModalOnBackdrop(event, 'how-it-works')">
+    <div class="modal-card">
+      <button class="modal-close" onclick="toggleModal('how-it-works')" aria-label="Close">&#10005;</button>
+      <div class="modal-title">How It Works</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">?</div>
+          <div class="step-text">
+            <h3>What does it know?</h3>
+            <p>MarioGPT is trained on over 700 sermons from Good News Church, the majority of which are by Mario Villella.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">!</div>
+          <div class="step-text">
+            <h3>Is it Mario?</h3>
+            <p>No, of course it's not Mario. I have however, attempted to make it sound like Mario and only use information Mario himself has said.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">💬</div>
+          <div class="step-text">
+            <h3>It's a conversation</h3>
+            <p>MarioGPT can discuss a number of topics. Give it a try by using some of the sample prompts on the main menu.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Demo Prompts Modal ─── -->
+  <div class="modal-overlay" id="demo-prompts" onclick="closeModalOnBackdrop(event, 'demo-prompts')">
+    <div class="modal-card">
+      <button class="modal-close" onclick="toggleModal('demo-prompts')" aria-label="Close">&#10005;</button>
+      <div class="modal-title">Try These Prompts</div>
+      <div class="demo-prompts-list">
+        <button class="demo-prompt" onclick="sendDemoPrompt('What can you help me with?')">
+          <span class="demo-prompt-icon">💬</span>
+          <span>What can you help me with?</span>
+        </button>
+        <button class="demo-prompt" onclick="sendDemoPrompt('Give me a quick summary of how you work.')">
+          <span class="demo-prompt-icon">⚡</span>
+          <span>Give me a quick summary of how you work.</span>
+        </button>
+        <button class="demo-prompt" onclick="sendDemoPrompt('What are some things I should try asking?')">
+          <span class="demo-prompt-icon">🎯</span>
+          <span>What are some things I should try asking?</span>
+        </button>
+        <button class="demo-prompt" onclick="sendDemoPrompt('Tell me something interesting!')">
+          <span class="demo-prompt-icon">✨</span>
+          <span>Tell me something interesting!</span>
+        </button>
+      </div>
+      <p class="demo-prompt-hint">Click any prompt to send it to MarioGPT</p>
+    </div>
+  </div>
+
+  <!-- ─── JavaScript ─── -->
+  <script>
+    // ============================================================
+    //  CONFIGURATION — Paste your Token Endpoint URL below
+    // ============================================================
+    // To find this value:
+    //   1. Open https://copilotstudio.microsoft.com
+    //   2. Select your MarioGPT agent
+    //   3. Go to Settings > Channels > Mobile app
+    //   4. Copy the "Token Endpoint" URL
+    //   5. Paste it between the quotes below
+
+    const tokenEndpoint = "https://5a6614de1fd5e080b7e9b1cc70d8cd.07.environment.api.powerplatform.com/powervirtualagents/botsbyschema/copilots_header_3dce5/directline/token?api-version=2022-03-01-preview";
+
+    // ============================================================
+
+    // ─── Style Options (branding) ───
+    const styleOptions = {
+      // Accent / theme
+      accent: "#ec6c33",
+      backgroundColor: "#fafafa",
+
+      // Bot bubbles
+      bubbleBackground: "#f1f0ee",
+      bubbleBorderColor: "#e8e7e5",
+      bubbleBorderRadius: 16,
+      bubbleBorderWidth: 1,
+      bubbleTextColor: "#333333",
+      bubbleMinHeight: 40,
+
+      // User bubbles
+      bubbleFromUserBackground: "#ec6c33",
+      bubbleFromUserBorderColor: "#ec6c33",
+      bubbleFromUserBorderRadius: 16,
+      bubbleFromUserBorderWidth: 0,
+      bubbleFromUserTextColor: "#ffffff",
+
+      // Avatars
+      botAvatarImage: "",
+      botAvatarInitials: "",
+      botAvatarBackgroundColor: "transparent",
+      userAvatarInitials: "",
+      userAvatarBackgroundColor: "transparent",
+
+      // Send box
+      sendBoxBackground: "#f3f4f6",
+      sendBoxBorderTop: "solid 1px #e5e7eb",
+      sendBoxButtonColor: "#ec6c33",
+      sendBoxButtonColorOnHover: "#d45a2a",
+      sendBoxPlaceholderColor: "#94a3b8",
+      sendBoxTextColor: "#1e293b",
+      sendBoxTextWrap: true,
+
+      // Suggested actions
+      suggestedActionBackgroundColor: "transparent",
+      suggestedActionBorderColor: "#ec6c33",
+      suggestedActionBorderRadius: 10,
+      suggestedActionTextColor: "#ec6c33",
+      suggestedActionLayout: "flow",
+
+      // General
+      primaryFont: "'Inter', 'Segoe UI', system-ui, sans-serif",
+      rootHeight: "100%",
+      rootWidth: "100%",
+      hideUploadButton: true,
+      avatarSize: 30,
+      bubbleMaxWidth: 360,
+      groupTimestamp: 5000,
+      sendTimeout: 120000,
+    };
+
+    // ─── Globals ───
+    let chatStore = null;
+
+    // ─── Custom store (fires greeting on connect + thinking indicator) ───
+    function createCustomStore() {
+      return window.WebChat.createStore({}, ({ dispatch }) => (next) => (action) => {
+        // Show thinking indicator when user sends a message
+        if (action.type === "WEB_CHAT/SEND_MESSAGE" ||
+            (action.type === "DIRECT_LINE/POST_ACTIVITY" &&
+             action.payload?.activity?.type === "message" &&
+             !action.payload?.activity?.channelData?.postBack)) {
+          showThinking();
+        }
+
+        // Hide thinking indicator when bot responds
+        if (action.type === "DIRECT_LINE/INCOMING_ACTIVITY" &&
+            action.payload?.activity?.type === "message" &&
+            action.payload?.activity?.from?.role === "bot") {
+          hideThinking();
+        }
+
+        if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
+          dispatch({
+            type: "DIRECT_LINE/POST_ACTIVITY",
+            meta: { method: "keyboard" },
+            payload: {
+              activity: {
+                channelData: { postBack: true },
+                name: "startConversation",
+                type: "event",
+              },
+            },
+          });
+        }
+        return next(action);
+      });
+    }
+
+    function showThinking() {
+      const el = document.getElementById("thinking-indicator");
+      if (el) el.classList.add("visible");
+    }
+
+    function hideThinking() {
+      const el = document.getElementById("thinking-indicator");
+      if (el) el.classList.remove("visible");
+    }
+
+    // ─── Initialize chat ───
+    async function initializeChat() {
+      if (tokenEndpoint === "YOUR_TOKEN_ENDPOINT_HERE") {
+        document.getElementById("chat-loading").innerHTML = `
+          <div style="padding: 24px; text-align: center; color: #64748b; font-size: 0.88rem; line-height: 1.6;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">🔧</div>
+            <strong style="color: #1e293b;">Setup Required</strong><br/>
+            Open <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:0.82rem;">index.html</code>
+            and replace <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:0.82rem;">YOUR_TOKEN_ENDPOINT_HERE</code>
+            with your Copilot Studio Token Endpoint URL.
+          </div>`;
+        return;
+      }
+
+      try {
+        // Resolve regional Direct Line URL
+        const environmentEndPoint = tokenEndpoint.slice(0, tokenEndpoint.indexOf("/powervirtualagents"));
+        const apiVersion = tokenEndpoint.slice(tokenEndpoint.indexOf("api-version")).split("=")[1];
+        const regionalChannelSettingsURL =
+          `${environmentEndPoint}/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`;
+
+        const regionalRes = await fetch(regionalChannelSettingsURL);
+        if (!regionalRes.ok) throw new Error("Failed to fetch regional channel settings.");
+        const regionalData = await regionalRes.json();
+        const directLineUrl = regionalData.channelUrlsById.directline;
+        directLineUrlCached = directLineUrl;
+
+        // Fetch token
+        const tokenRes = await fetch(tokenEndpoint);
+        if (!tokenRes.ok) throw new Error("Failed to fetch bot token.");
+        const tokenData = await tokenRes.json();
+
+        // Create Direct Line connection
+        const directLine = window.WebChat.createDirectLine({
+          domain: `${directLineUrl}v3/directline`,
+          token: tokenData.token,
+        });
+
+        // Create store
+        chatStore = createCustomStore();
+
+        // Hide loading spinner
+        document.getElementById("chat-loading").classList.add("hidden");
+
+        // Render Web Chat
+        window.WebChat.renderWebChat(
+          {
+            directLine,
+            styleOptions,
+            store: chatStore,
+          },
+          document.getElementById("webchat")
+        );
+      } catch (err) {
+        console.error("Chat initialization failed:", err);
+        document.getElementById("chat-loading").innerHTML = `
+          <div style="padding: 24px; text-align: center; color: #ef4444; font-size: 0.88rem; line-height: 1.6;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">⚠️</div>
+            <strong>Connection Error</strong><br/>
+            <span style="color: #64748b;">Could not connect to MarioGPT.<br/>Please check your Token Endpoint and try refreshing.</span>
+          </div>`;
+      }
+    }
+
+    // ─── Restart conversation ───
+    let directLineUrlCached = null;
+
+    async function restartConversation() {
+      window.location.reload();
+    }
+
+    // ─── Send a demo prompt into the chat ───
+    function sendDemoPrompt(text) {
+      // Close the modal
+      toggleModal("demo-prompts");
+
+      // Send the message via the Web Chat store
+      if (chatStore) {
+        chatStore.dispatch({
+          type: "WEB_CHAT/SEND_MESSAGE",
+          payload: { text },
+        });
+      }
+    }
+
+    // ─── Modal helpers ───
+    function toggleModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.toggle("visible");
+    }
+
+    function closeModalOnBackdrop(event, id) {
+      // Only close if clicking the overlay background, not the card
+      if (event.target === event.currentTarget) {
+        toggleModal(id);
+      }
+    }
+
+    // Close modals with Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal-overlay.visible").forEach((m) => {
+          m.classList.remove("visible");
+        });
+      }
+    });
+
+    // ─── Start ───
+    document.addEventListener("DOMContentLoaded", initializeChat);
+  </script>
+
+</body>
+</html>
