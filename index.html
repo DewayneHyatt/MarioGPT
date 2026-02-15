@@ -828,6 +828,12 @@
       sendTimeout: 120000,
     };
 
+    function getResponsiveStyleOptions() {
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      const bubbleMaxWidth = isMobile ? 360 : 620;
+      return { ...styleOptions, bubbleMaxWidth };
+    }
+
     // ─── Globals ───
     let chatStore = null;
 
@@ -921,10 +927,12 @@
         document.getElementById("chat-loading").classList.add("hidden");
 
         // Render Web Chat
+        const responsiveStyleOptions = getResponsiveStyleOptions();
+
         window.WebChat.renderWebChat(
           {
             directLine,
-            styleOptions,
+            styleOptions: responsiveStyleOptions,
             store: chatStore,
           },
           document.getElementById("webchat")
