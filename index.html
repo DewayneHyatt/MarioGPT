@@ -121,58 +121,253 @@
     /* ───────────────────────── Background Decoration ───────────────────────── */
     .bg-glow {
       position: fixed;
-      border-radius: 50%;
-      filter: blur(100px);
+      inset: 0;
       pointer-events: none;
       z-index: 0;
     }
 
     .bg-glow-1 {
-      width: 700px;
-      height: 700px;
-      top: -200px;
-      left: -150px;
-      background: var(--accent);
-      opacity: 0.25;
-      animation: drift1 8s ease-in-out infinite alternate;
+      background:
+        radial-gradient(circle at 5% 28%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 9% 54%, rgba(255, 255, 255, 0.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 17% 18%, rgba(255, 255, 255, 0.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 23% 37%, rgba(255, 255, 255, 0.85) 0 1.6px, transparent 2.6px),
+        radial-gradient(circle at 31% 46%, rgba(255, 255, 255, 0.92) 0 2px, transparent 3px),
+        radial-gradient(circle at 39% 30%, rgba(255, 255, 255, 0.9) 0 1.7px, transparent 2.7px),
+        radial-gradient(circle at 47% 57%, rgba(255, 255, 255, 0.92) 0 1.8px, transparent 2.8px),
+        radial-gradient(circle at 58% 22%, rgba(255, 255, 255, 0.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 65% 48%, rgba(255, 255, 255, 0.88) 0 1.7px, transparent 2.7px),
+        radial-gradient(circle at 71% 25%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 78% 42%, rgba(255, 255, 255, 0.85) 0 1.8px, transparent 2.8px),
+        radial-gradient(circle at 83% 19%, rgba(255, 255, 255, 0.88) 0 2px, transparent 3px),
+        radial-gradient(circle at 90% 34%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 95% 15%, rgba(255, 255, 255, 0.9) 0 1.8px, transparent 2.8px);
+      opacity: 0.5;
+      animation: twinkleSoft 11.2s ease-in-out infinite;
+      animation-delay: -3.4s;
     }
 
     .bg-glow-2 {
-      width: 600px;
-      height: 600px;
-      bottom: -250px;
-      right: -150px;
-      background: #4a4a4a;
-      opacity: 0.3;
-      animation: drift2 10s ease-in-out infinite alternate;
+      background:
+        radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.95) 0 2.5px, transparent 4px),
+        radial-gradient(circle at 46% 18%, rgba(255, 255, 255, 1) 0 2.7px, transparent 4.2px),
+        radial-gradient(circle at 63% 35%, rgba(255, 255, 255, 0.98) 0 2.6px, transparent 4px),
+        radial-gradient(circle at 77% 26%, rgba(255, 255, 255, 0.94) 0 2.5px, transparent 4px),
+        radial-gradient(circle at 88% 50%, rgba(255, 255, 255, 0.95) 0 2.7px, transparent 4px),
+        radial-gradient(circle at 54% 60%, rgba(255, 255, 255, 0.92) 0 2.4px, transparent 3.8px),
+        radial-gradient(circle at 26% 54%, rgba(255, 255, 255, 0.92) 0 2.3px, transparent 3.8px);
+      opacity: 0.14;
+      animation: twinkleDriftA 7.7s ease-in-out infinite;
+      animation-delay: -2.3s;
+    }
+
+    .bg-glow-2::before {
+      content: none;
+    }
+
+    .bg-cross-stars {
+      background: transparent;
+    }
+
+    .bg-cross-stars::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow:
+        6vw 11vh rgba(255, 255, 255, 0.98), 5.6vw 11vh rgba(255, 255, 255, 0.9), 6.4vw 11vh rgba(255, 255, 255, 0.9), 6vw 10.6vh rgba(255, 255, 255, 0.9), 6vw 11.4vh rgba(255, 255, 255, 0.9),
+        15vw 34vh rgba(255, 255, 255, 0.95), 14.62vw 34vh rgba(255, 255, 255, 0.86), 15.38vw 34vh rgba(255, 255, 255, 0.86), 15vw 33.62vh rgba(255, 255, 255, 0.86), 15vw 34.38vh rgba(255, 255, 255, 0.86),
+        23vw 51vh rgba(255, 255, 255, 0.92), 22.6vw 51vh rgba(255, 255, 255, 0.84), 23.4vw 51vh rgba(255, 255, 255, 0.84), 23vw 50.58vh rgba(255, 255, 255, 0.84), 23vw 51.42vh rgba(255, 255, 255, 0.84);
+      opacity: 0.94;
+      filter: drop-shadow(0 0 2.4px rgba(255, 255, 255, 0.72));
+      animation: none;
+    }
+
+    .bg-cross-stars::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2.8px;
+      height: 2.8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow:
+        77vw 12vh rgba(255, 255, 255, 0.96), 76.6vw 12vh rgba(255, 255, 255, 0.88), 77.4vw 12vh rgba(255, 255, 255, 0.88), 77vw 11.6vh rgba(255, 255, 255, 0.88), 77vw 12.4vh rgba(255, 255, 255, 0.88),
+        88vw 36vh rgba(255, 255, 255, 0.94), 87.62vw 36vh rgba(255, 255, 255, 0.85), 88.38vw 36vh rgba(255, 255, 255, 0.85), 88vw 35.6vh rgba(255, 255, 255, 0.85), 88vw 36.4vh rgba(255, 255, 255, 0.85);
+      opacity: 0.9;
+      filter: drop-shadow(0 0 2.1px rgba(255, 255, 255, 0.66));
+      animation: none;
+    }
+
+    .bg-glow-2::after {
+      content: none;
     }
 
     .bg-glow-3 {
-      top: 30%;
-      left: 45%;
-      width: 500px;
-      height: 500px;
-      background: var(--accent-dark);
-      opacity: 0.15;
-      animation: drift3 12s ease-in-out infinite alternate;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 32%, transparent 58%);
     }
 
-    @keyframes drift1 {
-      0%   { transform: translate(0, 0) scale(1); }
-      50%  { transform: translate(200px, 150px) scale(1.2); }
-      100% { transform: translate(-80px, 250px) scale(0.9); }
+    .bg-glow-3::before,
+    .bg-glow-3::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ff7a00;
     }
 
-    @keyframes drift2 {
-      0%   { transform: translate(0, 0) scale(1); }
-      50%  { transform: translate(-180px, -120px) scale(1.15); }
-      100% { transform: translate(120px, -200px) scale(0.85); }
+    .bg-glow-3::before {
+      box-shadow:
+        /* gentle slope from left edge */
+        0vw 90vh #ff7a00, 2vw 89.8vh #ff7a00, 4vw 89.6vh #ff7a00, 6vw 89.4vh #ff7a00,
+        8vw 89.2vh #ff7a00, 10vw 89vh #ff7a00, 12vw 88.8vh #ff7a00, 14vw 88.6vh #ff7a00,
+        16vw 88.4vh #ff7a00, 18vw 88.2vh #ff7a00, 20vw 88vh #ff7a00, 22vw 87.8vh #ff7a00,
+        24vw 87.6vh #ff7a00, 26vw 87.4vh #ff7a00, 28vw 87.2vh #ff7a00,
+        /* behind card - stays low */
+        30vw 87vh #ff7a00, 34vw 86.6vh #ff7a00, 38vw 86.2vh #ff7a00,
+        42vw 85.8vh #ff7a00, 46vw 85.4vh #ff7a00, 50vw 85vh #ff7a00,
+        54vw 84.6vh #ff7a00, 58vw 84vh #ff7a00, 62vw 83.4vh #ff7a00,
+        66vw 82.4vh #ff7a00, 68vw 81.6vh #ff7a00, 70vw 80.4vh #ff7a00,
+        /* rising into first peak */
+        72vw 78.6vh #ff7a00, 73vw 77.2vh #ff7a00, 74vw 75.4vh #ff7a00,
+        75vw 73vh #ff7a00, 76vw 70.2vh #ff7a00, 77vw 67vh #ff7a00,
+        78vw 63.6vh #ff7a00, 79vw 60.4vh #ff7a00, 80vw 58vh #ff7a00,
+        81vw 56.6vh #ff7a00,
+        /* peak 1 apex */
+        82vw 55vh #ff7a00,
+        /* descend into valley */
+        83vw 56.8vh #ff7a00, 84vw 59.4vh #ff7a00, 85vw 62vh #ff7a00,
+        87vw 63vh #ff7a00, 88vw 65vh #ff7a00,
+        /* valley floor */
+        89vw 64vh #ff7a00,
+        /* rise into second peak (taller) */
+        90vw 61vh #ff7a00, 91vw 57vh #ff7a00, 92vw 53vh #ff7a00,
+        93vw 50vh #ff7a00, 94vw 48.6vh #ff7a00,
+        /* peak 2 apex */
+        95vw 47.6vh #ff7a00,
+        /* descend to right edge */
+        96vw 49vh #ff7a00, 97vw 52.4vh #ff7a00, 98vw 57vh #ff7a00,
+        99vw 64vh #ff7a00, 100vw 70vh #ff7a00;
     }
 
-    @keyframes drift3 {
-      0%   { transform: translate(-50%, 0) scale(1); }
-      50%  { transform: translate(-20%, -120px) scale(1.3); }
-      100% { transform: translate(-80%, 100px) scale(0.8); }
+    .bg-glow-3::after {
+      width: 3px;
+      height: 3px;
+      background: rgba(255, 122, 0, 0.72);
+      box-shadow:
+        /* sub-ridge: smaller peak behind peak 1 */
+        76vw 76vh rgba(255, 122, 0, 0.72), 78vw 72vh rgba(255, 122, 0, 0.72),
+        80vw 68.5vh rgba(255, 122, 0, 0.72), 81vw 66.5vh rgba(255, 122, 0, 0.72),
+        82vw 65.4vh rgba(255, 122, 0, 0.72), 83vw 66vh rgba(255, 122, 0, 0.72),
+        84vw 68vh rgba(255, 122, 0, 0.72), 86vw 72vh rgba(255, 122, 0, 0.72),
+        88vw 76vh rgba(255, 122, 0, 0.72),
+
+        /* sub-ridge: smaller peak behind peak 2 */
+        89vw 73vh rgba(255, 122, 0, 0.72), 90vw 69vh rgba(255, 122, 0, 0.72),
+        91vw 65vh rgba(255, 122, 0, 0.72), 92vw 61.5vh rgba(255, 122, 0, 0.72),
+        93vw 59vh rgba(255, 122, 0, 0.72), 94vw 60vh rgba(255, 122, 0, 0.72),
+        95vw 63vh rgba(255, 122, 0, 0.72), 96vw 67vh rgba(255, 122, 0, 0.72),
+        97vw 72vh rgba(255, 122, 0, 0.72), 98vw 77vh rgba(255, 122, 0, 0.72),
+
+        /* small foothill bump */
+        74vw 80vh rgba(255, 122, 0, 0.72), 75vw 78.5vh rgba(255, 122, 0, 0.72),
+        76vw 78vh rgba(255, 122, 0, 0.72), 77vw 79vh rgba(255, 122, 0, 0.72),
+
+        /* groove: peak 1 left face */
+        80vw 59vh rgba(255, 122, 0, 0.48), 79.4vw 62vh rgba(255, 122, 0, 0.44),
+        78.8vw 65vh rgba(255, 122, 0, 0.40), 78.2vw 68vh rgba(255, 122, 0, 0.36),
+        77.6vw 71vh rgba(255, 122, 0, 0.32),
+
+        /* groove: peak 1 left face inner */
+        81vw 57vh rgba(255, 122, 0, 0.46), 80.6vw 60.5vh rgba(255, 122, 0, 0.42),
+        80.2vw 64vh rgba(255, 122, 0, 0.38), 79.8vw 67.5vh rgba(255, 122, 0, 0.34),
+
+        /* groove: peak 1 right face */
+        83.2vw 58vh rgba(255, 122, 0, 0.46), 83.8vw 61vh rgba(255, 122, 0, 0.42),
+        84.4vw 64vh rgba(255, 122, 0, 0.38), 85vw 67vh rgba(255, 122, 0, 0.34),
+
+        /* groove: peak 2 left face */
+        93vw 51vh rgba(255, 122, 0, 0.48), 92.3vw 54.5vh rgba(255, 122, 0, 0.44),
+        91.6vw 58vh rgba(255, 122, 0, 0.40), 90.9vw 61.5vh rgba(255, 122, 0, 0.36),
+
+        /* groove: peak 2 left face inner */
+        94vw 50vh rgba(255, 122, 0, 0.46), 93.4vw 53.5vh rgba(255, 122, 0, 0.42),
+        92.8vw 57vh rgba(255, 122, 0, 0.38), 92.2vw 60.5vh rgba(255, 122, 0, 0.34),
+
+        /* groove: peak 2 right face */
+        96vw 50vh rgba(255, 122, 0, 0.48), 96.6vw 54vh rgba(255, 122, 0, 0.44),
+        97.2vw 58vh rgba(255, 122, 0, 0.40), 97.8vw 62vh rgba(255, 122, 0, 0.36),
+
+        /* groove: peak 2 right face inner */
+        95.6vw 49vh rgba(255, 122, 0, 0.44), 96.2vw 52.5vh rgba(255, 122, 0, 0.40),
+        96.8vw 56vh rgba(255, 122, 0, 0.36), 97.4vw 59.5vh rgba(255, 122, 0, 0.32);
+    }
+
+    @keyframes twinkleSoft {
+      0%, 100% {
+        opacity: 0.22;
+        filter: brightness(0.82);
+      }
+      28% {
+        opacity: 0.54;
+        filter: brightness(1.08);
+      }
+      50% {
+        opacity: 0.78;
+        filter: brightness(1.32);
+      }
+      76% {
+        opacity: 0.42;
+        filter: brightness(0.96);
+      }
+    }
+
+    @keyframes twinkleMedium {
+      0%, 100% {
+        opacity: 0.24;
+        filter: brightness(0.95);
+      }
+      45% {
+        opacity: 0.76;
+        filter: brightness(1.3);
+      }
+      75% {
+        opacity: 0.42;
+        filter: brightness(1.05);
+      }
+    }
+
+    @keyframes twinkleDriftA {
+      0%, 100% { opacity: 0.08; filter: brightness(0.82); }
+      17% { opacity: 0.24; filter: brightness(1.0); }
+      36% { opacity: 0.14; filter: brightness(0.9); }
+      58% { opacity: 0.42; filter: brightness(1.24); }
+      79% { opacity: 0.18; filter: brightness(0.88); }
+    }
+
+    @keyframes twinkleDriftB {
+      0%, 100% { opacity: 0.48; filter: brightness(0.95); }
+      14% { opacity: 0.88; filter: brightness(1.2); }
+      32% { opacity: 0.56; filter: brightness(1.0); }
+      57% { opacity: 0.92; filter: brightness(1.26); }
+      76% { opacity: 0.62; filter: brightness(1.04); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bg-glow-1,
+      .bg-glow-2,
+      .bg-glow-2::before,
+      .bg-glow-2::after {
+        animation: none !important;
+      }
     }
 
     /* ───────────────────────── Chat Card ───────────────────────── */
@@ -739,6 +934,7 @@
   <!-- Background glows -->
   <div class="bg-glow bg-glow-1"></div>
   <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-cross-stars"></div>
   <div class="bg-glow bg-glow-3"></div>
 
   <!-- ─── Navigation ─── -->
