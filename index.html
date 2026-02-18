@@ -203,9 +203,13 @@
 
     .chat-header-actions {
       margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .new-chat-btn {
+    .new-chat-btn,
+    .export-chat-btn {
       background: rgba(255, 255, 255, 0.18);
       border: 1px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
@@ -221,11 +225,13 @@
       transition: all 0.2s ease;
     }
 
-    .new-chat-btn:hover {
+    .new-chat-btn:hover,
+    .export-chat-btn:hover {
       background: rgba(255, 255, 255, 0.3);
     }
 
-    .new-chat-btn svg {
+    .new-chat-btn svg,
+    .export-chat-btn svg {
       width: 14px;
       height: 14px;
     }
@@ -369,6 +375,84 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .export-transcript {
+      display: none;
+      color: #0f172a;
+      font-family: var(--font);
+      padding: 28px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    .export-transcript h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    .export-transcript-meta {
+      color: #475569;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+
+    .export-line {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      break-inside: avoid;
+    }
+
+    .export-line.user {
+      border-left: 4px solid #ec6c33;
+      background: #fff7f3;
+    }
+
+    .export-line.bot {
+      border-left: 4px solid #94a3b8;
+      background: #f8fafc;
+    }
+
+    .export-line-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      color: #475569;
+    }
+
+    .export-line-role {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .export-line-text {
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 0.92rem;
+      color: #0f172a;
+    }
+
+    @media print {
+      body.printing-transcript {
+        background: #ffffff !important;
+        overflow: visible !important;
+      }
+
+      body.printing-transcript > * {
+        display: none !important;
+      }
+
+      body.printing-transcript #export-transcript {
+        display: block !important;
+      }
     }
 
     /* ───────────────────────── Modal Overlay ───────────────────────── */
@@ -596,6 +680,14 @@
         font-size: 0.7rem;
       }
 
+      .export-chat-btn {
+        padding: 6px 8px;
+      }
+
+      .export-chat-btn .export-label {
+        display: none;
+      }
+
       .nav-btn-text {
         display: none;
       }
@@ -674,6 +766,10 @@
         <div class="chat-header-tagline">(It's not actually Mario)</div>
       </div>
       <div class="chat-header-actions">
+        <button class="export-chat-btn" onclick="exportConversation()" aria-label="Export conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span class="export-label">Export</span>
+        </button>
         <button class="new-chat-btn" onclick="restartConversation()" aria-label="New conversation">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
           New Chat
@@ -698,6 +794,8 @@
       <span class="thinking-label">MarioGPT is thinking…</span>
     </div>
   </div>
+
+  <section id="export-transcript" class="export-transcript" aria-hidden="true"></section>
 
   <!-- ─── How It Works Modal ─── -->
   <div class="modal-overlay" id="how-it-works" onclick="closeModalOnBackdrop(event, 'how-it-works')">
@@ -836,10 +934,97 @@
 
     // ─── Globals ───
     let chatStore = null;
+    const transcriptEntries = [];
+    const transcriptSeen = new Set();
+
+    function captureTranscriptActivity(activity) {
+      if (!activity || activity.type !== "message") return;
+
+      const role = activity.from?.role;
+      if (role !== "user" && role !== "bot") return;
+
+      const text = typeof activity.text === "string" ? activity.text.trim() : "";
+      if (!text) return;
+
+      const key = activity.id || `${role}:${activity.timestamp || ""}:${text}`;
+      if (transcriptSeen.has(key)) return;
+      transcriptSeen.add(key);
+
+      transcriptEntries.push({
+        role,
+        text,
+        timestamp: activity.timestamp || new Date().toISOString(),
+      });
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatTranscriptTime(value) {
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return "";
+      return parsed.toLocaleString();
+    }
+
+    function exportConversation() {
+      if (!transcriptEntries.length) {
+        window.alert("No conversation messages to export yet.");
+        return;
+      }
+
+      const shouldExport = window.confirm(
+        "This export includes conversation text and timestamps. Continue to print/save as PDF?"
+      );
+      if (!shouldExport) return;
+
+      const container = document.getElementById("export-transcript");
+      if (!container) return;
+
+      const rows = transcriptEntries
+        .map((entry) => {
+          const roleLabel = entry.role === "user" ? "You" : "MarioGPT";
+          const safeText = escapeHtml(entry.text);
+          const timeLabel = formatTranscriptTime(entry.timestamp);
+
+          return `
+            <article class="export-line ${entry.role}">
+              <div class="export-line-head">
+                <span class="export-line-role">${roleLabel}</span>
+                <time>${timeLabel}</time>
+              </div>
+              <div class="export-line-text">${safeText}</div>
+            </article>
+          `;
+        })
+        .join("");
+
+      container.innerHTML = `
+        <h1>MarioGPT Conversation Export</h1>
+        <div class="export-transcript-meta">Generated ${new Date().toLocaleString()}</div>
+        ${rows}
+      `;
+
+      document.body.classList.add("printing-transcript");
+      window.print();
+    }
+
+    window.addEventListener("afterprint", () => {
+      document.body.classList.remove("printing-transcript");
+    });
 
     // ─── Custom store (fires greeting on connect + thinking indicator) ───
     function createCustomStore() {
       return window.WebChat.createStore({}, ({ dispatch }) => (next) => (action) => {
+        if (action.type === "DIRECT_LINE/INCOMING_ACTIVITY") {
+          captureTranscriptActivity(action.payload?.activity);
+        }
+
         // Show thinking indicator when user sends a message
         if (action.type === "WEB_CHAT/SEND_MESSAGE" ||
             (action.type === "DIRECT_LINE/POST_ACTIVITY" &&
