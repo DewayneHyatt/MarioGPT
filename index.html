@@ -485,6 +485,14 @@
       display: none !important;
     }
 
+    /* Taller send box to match M365 Copilot style */
+    #webchat [class*="send-box__text-box"],
+    #webchat [class*="sendbox"] textarea,
+    #webchat [class*="send-box"] textarea,
+    #webchat [class*="send-box__text-box"] {
+      min-height: 100px !important;
+    }
+
     /* ───────────────────────── Thinking Indicator ───────────────────────── */
     .thinking-indicator {
       display: none;
@@ -1103,6 +1111,7 @@
       sendBoxPlaceholderColor: "#94a3b8",
       sendBoxTextColor: "#1e293b",
       sendBoxTextWrap: true,
+      sendBoxHeight: 100,
 
       // Suggested actions
       suggestedActionBackgroundColor: "transparent",
@@ -1315,6 +1324,9 @@
             directLine,
             styleOptions: responsiveStyleOptions,
             store: chatStore,
+            overrideLocalizedStrings: {
+              TEXT_INPUT_PLACEHOLDER: "Message MarioGPT"
+            },
           },
           document.getElementById("webchat")
         );
