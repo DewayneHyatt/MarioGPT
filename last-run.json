@@ -1,5 +1,5 @@
 {
-  "last_run_utc": "2026-07-30T20:26:05Z",
+  "last_run_utc": "2026-07-30T20:46:38Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
@@ -12,10 +12,10 @@
     "part": 1
   },
   "result": {
-    "ok": 3,
+    "ok": 0,
     "skipped": 0,
     "failed": 0,
-    "exists": 1
+    "exists": 4
   },
   "warnings": []
 }
