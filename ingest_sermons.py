@@ -651,6 +651,61 @@ def audit(eps, store, index) -> None:
         print("  confirm its replacement appears in the MISSING list above.")
 
 
+def write_latest(store, ep, t, prose, words, path, meta) -> None:
+    """Write the latest/ pointer pair.
+
+    Called from BOTH the fresh-upload path and the already-archived path. The
+    archive copy is permanent, but latest/ has to be refreshed whenever this is
+    the newest episode -- otherwise a rerun (or a first run after a manual
+    upload) leaves the downstream OneDrive/Cowork copy stale or absent.
+
+    The latest/ copy carries a plain-text header so whatever consumes it knows
+    which sermon it is without a second file. The archive copy under sermons/
+    stays header free: it is chunked by the search indexer, where a header
+    would only ever land in the first chunk anyway.
+    """
+    date_str = ep["pubdate"].strftime("%Y-%m-%d")
+    series = ep["series"] or "Standalone"
+
+    store.write("latest/latest.txt", header_block(ep, words) + prose, meta)
+    store.write("latest/latest.json", json.dumps({
+        "title": ep["title"],
+        "sermon_date": date_str,
+        "series": series,
+        "part": ep["part"],
+        "scripture": ep["scripture"],
+        "description": ep["description"][:1000],
+        "episode_url": ep["link"],
+        "audio_url": ep["audio"],
+        "transcript_url": t["url"],
+        "word_count": words,
+        "approx_tokens": int(words * 1.35),
+        "archive_blob": path,
+        "ingested_utc": meta["ingested_utc"],
+    }, indent=2, ensure_ascii=False),
+        {"sermon_date": date_str, "title": ep["title"], "series": series},
+        content_type="application/json")
+
+    if not store.dry and not store.out_dir:
+        onedrive_publish(ep, prose, words)
+
+
+def build_meta(ep, t, words) -> dict:
+    return {
+        "title": ep["title"],
+        "sermon_date": ep["pubdate"].strftime("%Y-%m-%d"),
+        "series": ep["series"] or "Standalone",
+        "part": str(ep["part"]) if ep["part"] else "",
+        "scripture": ep["scripture"] or "",
+        "episode_url": ep["link"],
+        "transcript_source": t["url"],
+        "audio_url": ep["audio"] or "",
+        "word_count": str(words),
+        "source": "rss-podbean",
+        "ingested_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+
+
 def handle(ep, store, latest, force, index=None) -> str:
     date_str = ep["pubdate"].strftime("%Y-%m-%d")
     head = f"{date_str}  {ep['title'][:52]}"
@@ -663,18 +718,19 @@ def handle(ep, store, latest, force, index=None) -> str:
     path = blob_path(ep, index)
     if not force and path in store.existing():
         print(f"  ==  {head}\n       already in container, skipping")
-        # The archive copy is done, but OneDrive still needs this week's
-        # transcript -- otherwise a rerun after a manual upload would leave
-        # the Cowork copy stale. Only relevant when publishing to Graph
-        # directly; the Power Automate path re-copies latest/ on its own.
-        if latest and graph_configured() and not store.dry and not store.out_dir:
+        # Archive copy is already there, but if this is the newest episode the
+        # latest/ pointer still has to be refreshed.
+        if latest:
             try:
                 r = requests.get(t["url"], headers=UA, timeout=TIMEOUT)
                 r.raise_for_status()
                 prose = to_prose(r.content, t["type"])
-                onedrive_publish(ep, prose, len(prose.split()))
+                words = len(prose.split())
+                print(f"       refreshing latest/ pointer ({words:,} words)")
+                write_latest(store, ep, t, prose, words, path,
+                             build_meta(ep, t, words))
             except requests.RequestException as e:
-                warn(f"OneDrive refresh skipped, download failed: {e}")
+                warn(f"latest/ refresh failed, download error: {e}")
         return "exists"
 
     try:
@@ -706,47 +762,11 @@ def handle(ep, store, latest, force, index=None) -> str:
         warn(f"{date_str} '{ep['title'][:40]}': description mentions a part "
              f"number but no series could be read. Filed as Standalone.")
 
-    meta = {
-        "title": ep["title"],
-        "sermon_date": date_str,
-        "series": series,
-        "part": str(ep["part"]) if ep["part"] else "",
-        "scripture": ep["scripture"] or "",
-        "episode_url": ep["link"],
-        "transcript_source": t["url"],
-        "audio_url": ep["audio"] or "",
-        "word_count": str(words),
-        "source": "rss-podbean",
-        "ingested_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-    }
+    meta = build_meta(ep, t, words)
     store.write(path, prose, meta)
 
     if latest:
-        # The latest/ copy carries a plain-text header so whatever consumes it
-        # (Power Automate -> OneDrive -> Cowork) knows which sermon it is
-        # without a second file. The archive copy under sermons/ stays header
-        # free: it is chunked by the search indexer, where a header would only
-        # ever land in the first chunk anyway.
-        store.write("latest/latest.txt", header_block(ep, words) + prose, meta)
-        store.write("latest/latest.json", json.dumps({
-            "title": ep["title"],
-            "sermon_date": date_str,
-            "series": series,
-            "part": ep["part"],
-            "scripture": ep["scripture"],
-            "description": ep["description"][:1000],
-            "episode_url": ep["link"],
-            "audio_url": ep["audio"],
-            "transcript_url": t["url"],
-            "word_count": words,
-            "approx_tokens": int(words * 1.35),
-            "archive_blob": path,
-            "ingested_utc": meta["ingested_utc"],
-        }, indent=2, ensure_ascii=False),
-            {"sermon_date": date_str, "title": ep["title"], "series": series},
-            content_type="application/json")
-        if not store.dry and not store.out_dir:
-            onedrive_publish(ep, prose, words)
+        write_latest(store, ep, t, prose, words, path, meta)
     return "ok"
 
 
