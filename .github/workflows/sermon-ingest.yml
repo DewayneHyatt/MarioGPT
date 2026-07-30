@@ -5,16 +5,22 @@
 ##   AZURE_STORAGE_CONNECTION_STRING
 ##   (GitHub repo > Settings > Secrets and variables > Actions > New secret)
 ##
-## Sermons post Sunday. This runs Monday 09:00 UTC (about 5am Eastern),
-## giving Podbean's transcription queue overnight to finish. If the
+## Sermons post Sunday. This runs Monday 22:00 UTC (6pm Eastern during EDT),
+## giving Podbean's transcription queue plenty of time to finish. If the
 ## transcript is not up yet the run reports "no-transcript" and exits
-## clean. Next Monday picks it up, or you trigger it manually.
+## clean -- the job checks the 4 newest episodes each run, so a late
+## transcript is picked up on a later run rather than lost.
+##
+## NOTE: GitHub cron is always UTC and does not follow daylight saving. When
+## Eastern moves to EST (first Sunday in November), 22:00 UTC becomes 5pm
+## local. Change to "0 23 * * 1" then if 6pm local matters.
+## Scheduled runs are also best-effort and can be delayed 10-30+ minutes.
 
 name: Ingest sermon transcript
 
 on:
   schedule:
-    - cron: "0 9 * * 1"
+    - cron: "0 22 * * 1"
   workflow_dispatch:
     inputs:
       backfill:
