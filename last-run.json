@@ -1,0 +1,21 @@
+{
+  "last_run_utc": "2026-07-30T20:26:05Z",
+  "feed": "https://podcast.goodnewsocala.com/feed.xml",
+  "mode": "latest",
+  "target": "corpus",
+  "episodes_in_feed": 100,
+  "episodes_with_transcripts": 96,
+  "newest_episode": {
+    "title": "The Story Behind The Letter",
+    "pubdate": "2026-07-26",
+    "series": "Reconciled",
+    "part": 1
+  },
+  "result": {
+    "ok": 3,
+    "skipped": 0,
+    "failed": 0,
+    "exists": 1
+  },
+  "warnings": []
+}
