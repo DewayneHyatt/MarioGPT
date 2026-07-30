@@ -1,0 +1,91 @@
+## MarioGPT weekly transcript ingestion
+## Save as:  .github/workflows/sermon-ingest.yml
+##
+## One repo secret required:
+##   AZURE_STORAGE_CONNECTION_STRING
+##   (GitHub repo > Settings > Secrets and variables > Actions > New secret)
+##
+## Sermons post Sunday. This runs Monday 09:00 UTC (about 5am Eastern),
+## giving Podbean's transcription queue overnight to finish. If the
+## transcript is not up yet the run reports "no-transcript" and exits
+## clean. Next Monday picks it up, or you trigger it manually.
+
+name: Ingest sermon transcript
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Walk the whole feed instead of just the newest"
+        type: boolean
+        default: false
+      since:
+        description: "Only episodes on/after this date (YYYY-MM-DD)"
+        type: string
+        default: ""
+      dry_run:
+        description: "Show what would happen, write nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sermon-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install --quiet requests azure-storage-blob
+
+      - name: Run ingestion
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          BLOB_CONTAINER: corpus
+          # OneDrive publishing is handled by a Power Automate flow that copies
+          # corpus/latest/latest.txt on a schedule, so no Graph app registration
+          # and no tenant-wide Files.ReadWrite.All is needed here.
+          #
+          # To publish straight to OneDrive from this job instead, register an
+          # app and set the four secrets below. Prefer Sites.Selected against a
+          # SharePoint library over Files.ReadWrite.All, which grants app-only
+          # access to every file in the tenant.
+          #
+          # GRAPH_TENANT_ID: ${{ secrets.GRAPH_TENANT_ID }}
+          # GRAPH_CLIENT_ID: ${{ secrets.GRAPH_CLIENT_ID }}
+          # GRAPH_CLIENT_SECRET: ${{ secrets.GRAPH_CLIENT_SECRET }}
+          # ONEDRIVE_UPN: ${{ secrets.ONEDRIVE_UPN }}
+          IN_BACKFILL: ${{ inputs.backfill }}
+          IN_DRY_RUN: ${{ inputs.dry_run }}
+          IN_SINCE: ${{ inputs.since }}
+        run: |
+          ARGS=""
+          [ "$IN_BACKFILL" = "true" ] && ARGS="$ARGS --backfill"
+          [ "$IN_DRY_RUN"  = "true" ] && ARGS="$ARGS --dry-run"
+          [ -n "$IN_SINCE" ] && ARGS="$ARGS --since $IN_SINCE"
+          python ingest_sermons.py $ARGS
+
+      # Commits last-run.json back to the repo. This is a useful audit trail,
+      # and it doubles as repo activity: GitHub disables scheduled workflows
+      # after 60 days without a commit, and this repo is otherwise idle.
+      - name: Commit run log
+        if: always() && inputs.dry_run != true
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add last-run.json || exit 0
+          git diff --staged --quiet && echo "no change" && exit 0
+          git commit -m "chore: sermon ingest run log [skip ci]"
+          git push

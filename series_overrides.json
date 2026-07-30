@@ -1,0 +1,62 @@
+{
+  "_README": [
+    "Corrections for episodes whose description does not follow the",
+    "'Part N of \"Series\"' convention that blob_path() relies on.",
+    "",
+    "KEY   : the episode URL (preferred, stable) or the exact episode title.",
+    "        Trailing slash and letter case are ignored.",
+    "VALUE : any of",
+    "          series    - series name, or null to force Standalone",
+    "          part      - part number, or null for a series with no numbering",
+    "          scripture - overrides the auto-detected scripture reference",
+    "",
+    "An override replaces whatever the description parser produced, and marks",
+    "the episode series_match=override so it is not flagged as a warning.",
+    "",
+    "AFTER EDITING THIS FILE, see the 'rectify' notes at the bottom."
+  ],
+
+  "https://podcast.goodnewsocala.com/e/problem-7-science-instead-of-morality/": {
+    "series": "Modern American Problems",
+    "part": 7
+  },
+
+  "https://podcast.goodnewsocala.com/e/problem-8-experience-instead-of-the-bible/": {
+    "series": "Modern American Problems",
+    "part": 8
+  },
+
+  "_PENDING_CONFIRMATION": [
+    "From Prison To Palace (2026-05-24) is filed Standalone. It sits exactly",
+    "in the gap where part 12 of 'From Abraham to Joseph' is missing, and its",
+    "description is about the Joseph story. If that is right, uncomment the",
+    "block below by moving it out of this _PENDING key and into the top level.",
+    "",
+    "  \"https://podcast.goodnewsocala.com/e/from-prison-to-palace/\": {",
+    "    \"series\": \"From Abraham to Joseph\",",
+    "    \"part\": 12",
+    "  }",
+    "",
+    "Jesus Didn't Stay Down (2026-04-05) is correctly Standalone -- its",
+    "description says it was the 2026 Easter stand-alone sermon. No override."
+  ],
+
+  "_RECTIFY_AFTER_SYNC": [
+    "Adding an override changes the path a sermon SHOULD live at. Files",
+    "already uploaded to the old path do not move themselves. To fix:",
+    "",
+    "  1. python ingest_sermons.py --audit",
+    "     MISSING     = the new correct paths, not yet written",
+    "     UNEXPECTED  = includes the old wrong-path files, now orphaned",
+    "",
+    "  2. python ingest_sermons.py --backfill --since <date> --force",
+    "     Writes the transcripts to the corrected paths.",
+    "",
+    "  3. Re-run --audit. The MISSING list should now be empty. Delete the",
+    "     specific orphans you identified in step 1 -- BY NAME, one at a time.",
+    "",
+    "Never bulk-delete the UNEXPECTED list. It also contains the old Azure",
+    "Speech '-audio.txt' transcripts, the .jsonl provenance files, and any",
+    "episode that has aged out of the feed's 100-item window."
+  ]
+}
