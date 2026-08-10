@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-08-03T22:47:24Z",
+  "last_run_utc": "2026-08-10T22:23:21Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Forgiveness",
-    "pubdate": "2026-08-02",
+    "title": "Apologies and the Gospel",
+    "pubdate": "2026-08-09",
     "series": "Reconciled",
-    "part": 2
+    "part": 3
   },
   "result": {
     "ok": 1,
