@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-08-24T22:12:42Z",
+  "last_run_utc": "2026-09-01T00:50:41Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "What Is A Church Member? And What Do They Do?",
-    "pubdate": "2026-08-23",
+    "title": "Baptism",
+    "pubdate": "2026-08-30",
     "series": "Church, Unpacked",
-    "part": 2
+    "part": 3
   },
   "result": {
     "ok": 1,
