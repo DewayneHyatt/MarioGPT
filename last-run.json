@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-09-01T00:50:41Z",
+  "last_run_utc": "2026-09-07T23:49:45Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Baptism",
-    "pubdate": "2026-08-30",
+    "title": "Lord’s Supper",
+    "pubdate": "2026-09-06",
     "series": "Church, Unpacked",
-    "part": 3
+    "part": 4
   },
   "result": {
     "ok": 1,
