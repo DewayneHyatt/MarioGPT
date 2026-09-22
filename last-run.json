@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-09-15T00:02:12Z",
+  "last_run_utc": "2026-09-22T00:19:41Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Teaching and Learning",
-    "pubdate": "2026-09-13",
+    "title": "Worship",
+    "pubdate": "2026-09-20",
     "series": "Church, Unpacked",
-    "part": 5
+    "part": 6
   },
   "result": {
     "ok": 1,
