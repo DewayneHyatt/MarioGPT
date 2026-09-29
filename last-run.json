@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-09-22T00:19:41Z",
+  "last_run_utc": "2026-09-29T01:19:22Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Worship",
-    "pubdate": "2026-09-20",
+    "title": "Church Discipline A",
+    "pubdate": "2026-09-27",
     "series": "Church, Unpacked",
-    "part": 6
+    "part": 7
   },
   "result": {
     "ok": 1,
