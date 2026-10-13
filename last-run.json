@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-10-06T01:57:25Z",
+  "last_run_utc": "2026-10-13T02:44:47Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Church Discipline B",
-    "pubdate": "2026-10-04",
+    "title": "Ministering",
+    "pubdate": "2026-10-11",
     "series": "Church, Unpacked",
-    "part": 8
+    "part": 9
   },
   "result": {
     "ok": 1,
