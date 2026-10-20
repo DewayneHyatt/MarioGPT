@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-10-13T02:44:47Z",
+  "last_run_utc": "2026-10-20T00:45:55Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Ministering",
-    "pubdate": "2026-10-11",
-    "series": "Church, Unpacked",
-    "part": 9
+    "title": "Reaching Out",
+    "pubdate": "2026-10-18",
+    "series": "Standalone",
+    "part": null
   },
   "result": {
     "ok": 1,
