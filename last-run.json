@@ -1,15 +1,15 @@
 {
-  "last_run_utc": "2026-11-03T03:06:49Z",
+  "last_run_utc": "2026-11-10T03:51:37Z",
   "feed": "https://podcast.goodnewsocala.com/feed.xml",
   "mode": "latest",
   "target": "corpus",
   "episodes_in_feed": 100,
   "episodes_with_transcripts": 96,
   "newest_episode": {
-    "title": "Dealing With injustice",
-    "pubdate": "2026-11-01",
+    "title": "Justice Is Coming",
+    "pubdate": "2026-11-08",
     "series": "Habakkuk",
-    "part": 1
+    "part": 2
   },
   "result": {
     "ok": 1,
